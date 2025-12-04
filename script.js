@@ -1,41 +1,35 @@
-// Telegram Bot Auto-Start
-document.addEventListener('DOMContentLoaded', function() {
-    // Cek jika di Telegram WebApp
-    if (window.Telegram && window.Telegram.WebApp) {
-        const tg = window.Telegram.WebApp;
-        
-        // Auto expand
-        tg.expand();
-        
-        // Auto login jika ada user data
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            const user = tg.initDataUnsafe.user;
-            const currentUser = {
-                id: user.id,
-                username: user.username || `user_${user.id}`,
-                firstName: user.first_name || 'Anon',
-                lastName: user.last_name || ''
-            };
-            
-            localStorage.setItem('anonz_user', JSON.stringify(currentUser));
-            
-            // Auto redirect ke main screen
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('main-screen').classList.remove('hidden');
-            document.getElementById('username').textContent = `@${currentUser.username}`;
-        }
-    }
-});// Inisialisasi WebApp Telegram
-const tg = window.Telegram.WebApp;
-tg.expand(); // Expand ke full screen
+// Telegram WebApp initialization
+let tg = window.Telegram?.WebApp;
+
+if (tg) {
+    tg.ready();
+    tg.expand();
+} else {
+    // Mock for development
+    tg = {
+        initDataUnsafe: {
+            user: {
+                id: Date.now(),
+                username: 'test_user_' + Math.random().toString(36).substr(2, 9),
+                first_name: 'Test',
+                last_name: 'User'
+            }
+        },
+        expand: () => console.log('Mock expand'),
+        ready: () => console.log('Mock ready')
+    };
+}
 
 // State aplikasi
 let currentUser = null;
+let selectedHashtags = [];
 let posts = [];
 
 // DOM Elements
 const loginScreen = document.getElementById('login-screen');
 const mainScreen = document.getElementById('main-screen');
+const hashtagScreen = document.getElementById('hashtag-screen');
+const rageScreen = document.getElementById('rage-screen');
 const telegramLoginBtn = document.getElementById('telegram-login-btn');
 const logoutBtn = document.getElementById('logout-btn');
 const usernameDisplay = document.getElementById('username');
@@ -45,88 +39,307 @@ const postBtn = document.getElementById('post-btn');
 const charCount = document.getElementById('char-count');
 const postsContainer = document.getElementById('posts-container');
 const refreshBtn = document.getElementById('refresh-btn');
+const nextToRageBtn = document.getElementById('next-to-rage-btn');
+const rageCharCount = document.getElementById('rage-char-count');
+const postFirstRageBtn = document.getElementById('post-first-rage-btn');
+const firstRageInput = document.getElementById('first-rage');
 
 // Inisialisasi aplikasi
 function initApp() {
-    // Cek apakah user sudah login
+    console.log('App initializing...');
+    
+    // Cek apakah user sudah login DAN sudah pilih hashtag
     const savedUser = localStorage.getItem('anonz_user');
+    const savedHashtags = localStorage.getItem('anonz_hashtags');
+    
     if (savedUser) {
         currentUser = JSON.parse(savedUser);
-        showMainScreen();
+        console.log('User found:', currentUser.username);
+        
+        if (savedHashtags) {
+            // User sudah pilih hashtag, langsung ke main screen
+            console.log('Hashtags found, showing main screen');
+            showMainScreen();
+        } else {
+            // User belum pilih hashtag
+            console.log('No hashtags, showing hashtag screen');
+            showHashtagScreen();
+        }
     } else {
+        console.log('No user, showing login screen');
         showLoginScreen();
     }
 }
 
-// Tampilkan login screen
+// ================= SCREEN MANAGEMENT =================
+
 function showLoginScreen() {
-    loginScreen.classList.remove('hidden');
-    mainScreen.classList.add('hidden');
+    console.log('Showing login screen');
+    setScreenVisibility('login');
 }
 
-// Tampilkan main screen
+function showHashtagScreen() {
+    console.log('Showing hashtag screen');
+    setScreenVisibility('hashtag');
+    
+    // Reset selection
+    selectedHashtags = [];
+    updateSelectionCount();
+}
+
+function showRageScreen() {
+    console.log('Showing rage screen');
+    setScreenVisibility('rage');
+    displaySelectedHashtags();
+}
+
 function showMainScreen() {
-    loginScreen.classList.add('hidden');
-    mainScreen.classList.remove('hidden');
+    console.log('Showing main screen');
+    setScreenVisibility('main');
     
     // Update user info
-    usernameDisplay.textContent = `@${currentUser.username}`;
-    userAvatar.textContent = getRandomEmoji(currentUser.username);
+    if (currentUser && usernameDisplay) {
+        usernameDisplay.textContent = `@${currentUser.username}`;
+        userAvatar.textContent = getRandomEmoji(currentUser.username);
+    }
+    
+    // Display user hashtags
+    displayUserHashtags();
     
     // Load posts
     loadPosts();
 }
 
-// Generate random emoji berdasarkan username
-function getRandomEmoji(username) {
-    const emojis = ['🕶️', '👻', '🐱', '🦊', '🐼', '🦄', '🐸', '🦋', '🐙', '🦉'];
-    const hash = username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return emojis[hash % emojis.length];
+function setScreenVisibility(activeScreen) {
+    // Hide all screens
+    const screens = [loginScreen, hashtagScreen, rageScreen, mainScreen];
+    screens.forEach(screen => {
+        if (screen) screen.classList.add('hidden');
+    });
+    
+    // Show active screen
+    switch(activeScreen) {
+        case 'login':
+            if (loginScreen) loginScreen.classList.remove('hidden');
+            break;
+        case 'hashtag':
+            if (hashtagScreen) hashtagScreen.classList.remove('hidden');
+            break;
+        case 'rage':
+            if (rageScreen) rageScreen.classList.remove('hidden');
+            break;
+        case 'main':
+            if (mainScreen) mainScreen.classList.remove('hidden');
+            break;
+    }
 }
 
-// Login dengan Telegram
-telegramLoginBtn.addEventListener('click', async () => {
+// ================= HASHTAG SELECTION =================
+
+// Event Listeners untuk hashtag selection
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, setting up event listeners');
+    
+    // Setup hashtag checkboxes
+    const checkboxes = document.querySelectorAll('input[name="hashtag"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                if (selectedHashtags.length < 3) {
+                    selectedHashtags.push(this.value);
+                    console.log('Added hashtag:', this.value);
+                } else {
+                    this.checked = false;
+                    alert('Maksimal 3 hashtag!');
+                }
+            } else {
+                selectedHashtags = selectedHashtags.filter(tag => tag !== this.value);
+                console.log('Removed hashtag:', this.value);
+            }
+            
+            updateSelectionCount();
+        });
+    });
+    
+    // Next button
+    if (nextToRageBtn) {
+        nextToRageBtn.addEventListener('click', showRageScreen);
+    }
+    
+    // Rage input character count
+    if (firstRageInput) {
+        firstRageInput.addEventListener('input', function() {
+            const count = this.value.length;
+            if (rageCharCount) rageCharCount.textContent = count;
+            if (postFirstRageBtn) {
+                postFirstRageBtn.disabled = count === 0 || count > 280;
+            }
+        });
+    }
+    
+    // Post first rage
+    if (postFirstRageBtn) {
+        postFirstRageBtn.addEventListener('click', postFirstRage);
+    }
+    
+    // Telegram login
+    if (telegramLoginBtn) {
+        telegramLoginBtn.addEventListener('click', handleTelegramLogin);
+    }
+    
+    // Logout
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+    }
+    
+    // Post creation
+    if (postContent) {
+        postContent.addEventListener('input', updatePostCharCount);
+    }
+    
+    if (postBtn) {
+        postBtn.addEventListener('click', createPost);
+    }
+    
+    // Refresh
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', loadPosts);
+    }
+    
+    // Initialize app
+    initApp();
+});
+
+function updateSelectionCount() {
+    const countElement = document.getElementById('selected-count');
+    if (countElement) {
+        countElement.textContent = selectedHashtags.length;
+    }
+    
+    if (nextToRageBtn) {
+        nextToRageBtn.disabled = selectedHashtags.length !== 3;
+    }
+}
+
+function displaySelectedHashtags() {
+    const container = document.getElementById('selected-hashtags-display');
+    if (container && selectedHashtags.length > 0) {
+        container.innerHTML = selectedHashtags.map(tag => 
+            `<div class="hashtag-pill">${tag}</div>`
+        ).join('');
+    }
+}
+
+// ================= FIRST RAGE =================
+
+function postFirstRage() {
+    if (!firstRageInput) return;
+    
+    const rageContent = firstRageInput.value.trim();
+    
+    if (rageContent.length === 0 || rageContent.length > 280) {
+        alert('Tulis kesal kamu dulu! Max 280 karakter.');
+        return;
+    }
+    
+    // Save hashtags to localStorage
+    localStorage.setItem('anonz_hashtags', JSON.stringify(selectedHashtags));
+    
+    // Create first post
+    const firstPost = {
+        id: Date.now(),
+        username: currentUser.username,
+        content: rageContent,
+        hashtags: [...selectedHashtags],
+        timestamp: new Date().toISOString(),
+        likes: 0,
+        comments: [],
+        avatar: getRandomEmoji(currentUser.username),
+        isFirstRage: true
+    };
+    
+    // Add to posts
+    const savedPosts = localStorage.getItem('anonz_posts');
+    posts = savedPosts ? JSON.parse(savedPosts) : [];
+    posts.unshift(firstPost);
+    localStorage.setItem('anonz_posts', JSON.stringify(posts));
+    
+    // Show main screen
+    showMainScreen();
+}
+
+// ================= USER PROFILE =================
+
+function displayUserHashtags() {
+    const savedHashtags = localStorage.getItem('anonz_hashtags');
+    if (savedHashtags) {
+        const hashtags = JSON.parse(savedHashtags);
+        const userInfo = document.querySelector('.user-info');
+        
+        if (userInfo) {
+            // Remove existing hashtags display
+            const existing = userInfo.querySelector('.user-hashtags');
+            if (existing) {
+                existing.remove();
+            }
+            
+            // Add new hashtags display
+            const hashtagContainer = document.createElement('div');
+            hashtagContainer.className = 'user-hashtags';
+            hashtagContainer.innerHTML = hashtags.map(tag => 
+                `<span class="user-hashtag">${tag}</span>`
+            ).join('');
+            
+            userInfo.appendChild(hashtagContainer);
+        }
+    }
+}
+
+// ================= LOGIN/LOGOUT =================
+
+function handleTelegramLogin() {
+    console.log('Telegram login clicked');
+    
     if (tg.initDataUnsafe?.user) {
-        // Jika di dalam Telegram WebApp
         const tgUser = tg.initDataUnsafe.user;
         currentUser = {
             id: tgUser.id,
             username: tgUser.username || `user_${tgUser.id}`,
-            firstName: tgUser.first_name,
-            lastName: tgUser.last_name
+            firstName: tgUser.first_name || 'Anon',
+            lastName: tgUser.last_name || ''
         };
+        console.log('Logged in via Telegram:', currentUser.username);
     } else {
-        // Fallback untuk development (tanpa Telegram)
+        // Fallback for development
         currentUser = {
             id: Date.now(),
             username: `anon_${Math.random().toString(36).substr(2, 9)}`,
             firstName: 'Anon',
             lastName: 'User'
         };
+        console.log('Logged in via mock:', currentUser.username);
     }
     
-    // Simpan user ke localStorage
     localStorage.setItem('anonz_user', JSON.stringify(currentUser));
-    
-    // Tampilkan main screen
-    showMainScreen();
-});
+    showHashtagScreen();
+}
 
-// Logout
-logoutBtn.addEventListener('click', () => {
+function handleLogout() {
     if (confirm('Yakin mau keluar?')) {
         localStorage.removeItem('anonz_user');
+        localStorage.removeItem('anonz_hashtags');
         currentUser = null;
+        selectedHashtags = [];
         showLoginScreen();
     }
-});
+}
 
-// Update character count
-postContent.addEventListener('input', () => {
+// ================= POST SYSTEM =================
+
+function updatePostCharCount() {
     const count = postContent.value.length;
     charCount.textContent = count;
     
-    // Change color if approaching limit
     if (count > 250) {
         charCount.style.color = '#ff6b6b';
     } else if (count > 200) {
@@ -134,10 +347,9 @@ postContent.addEventListener('input', () => {
     } else {
         charCount.style.color = '#666';
     }
-});
+}
 
-// Create new post
-postBtn.addEventListener('click', async () => {
+function createPost() {
     const content = postContent.value.trim();
     
     if (!content) {
@@ -150,7 +362,6 @@ postBtn.addEventListener('click', async () => {
         return;
     }
     
-    // Create post object
     const newPost = {
         id: Date.now(),
         username: currentUser.username,
@@ -161,41 +372,23 @@ postBtn.addEventListener('click', async () => {
         avatar: getRandomEmoji(currentUser.username)
     };
     
-    // Add to posts array
     posts.unshift(newPost);
-    
-    // Clear input
     postContent.value = '';
     charCount.textContent = '0';
     charCount.style.color = '#666';
     
-    // Save to localStorage (temporary)
     savePosts();
-    
-    // Update UI
     renderPosts();
     
-    // Simulate API call
-    try {
-        // For now, we'll just use localStorage
-        // In production, replace with actual API call to Supabase
-        console.log('Post created:', newPost);
-        
-        // Show success message
-        showNotification('Post berhasil dibuat! 🚀');
-    } catch (error) {
-        console.error('Error creating post:', error);
-        alert('Gagal membuat post, coba lagi ya!');
-    }
-});
+    showNotification('Post berhasil dibuat! 🚀');
+}
 
-// Load posts from localStorage
 function loadPosts() {
     const savedPosts = localStorage.getItem('anonz_posts');
     if (savedPosts) {
         posts = JSON.parse(savedPosts);
     } else {
-        // Sample posts for first time users
+        // Sample posts
         posts = [
             {
                 id: 1,
@@ -205,24 +398,6 @@ function loadPosts() {
                 likes: 24,
                 comments: [],
                 avatar: '🐱'
-            },
-            {
-                id: 2,
-                username: 'ghost_writer',
-                content: 'Hari ini belajar 5 jam non-stop, proud of myself! 💪',
-                timestamp: new Date(Date.now() - 7200000).toISOString(),
-                likes: 42,
-                comments: [],
-                avatar: '👻'
-            },
-            {
-                id: 3,
-                username: 'coffee_addict',
-                content: 'Kopi ketiga hari ini, tidur itu untuk yang lemah ☕️',
-                timestamp: new Date(Date.now() - 10800000).toISOString(),
-                likes: 31,
-                comments: [],
-                avatar: '🦊'
             }
         ];
         savePosts();
@@ -231,13 +406,13 @@ function loadPosts() {
     renderPosts();
 }
 
-// Save posts to localStorage
 function savePosts() {
     localStorage.setItem('anonz_posts', JSON.stringify(posts));
 }
 
-// Render posts to UI
 function renderPosts() {
+    if (!postsContainer) return;
+    
     if (posts.length === 0) {
         postsContainer.innerHTML = '<div class="empty-feed">Belum ada post, buat yang pertama! 🚀</div>';
         return;
@@ -251,6 +426,7 @@ function renderPosts() {
                 <span class="post-time">${formatTime(post.timestamp)}</span>
             </div>
             <div class="post-content">${escapeHtml(post.content)}</div>
+            ${post.hashtags ? `<div class="post-hashtags">${post.hashtags.map(tag => `<span class="post-hashtag">${tag}</span>`).join('')}</div>` : ''}
             <div class="post-actions">
                 <button class="post-action-btn like-btn" onclick="likePost(${post.id})">
                     <span>👍</span> <span>${post.likes}</span>
@@ -263,7 +439,15 @@ function renderPosts() {
     `).join('');
 }
 
-// Format waktu
+// ================= HELPER FUNCTIONS =================
+
+function getRandomEmoji(username) {
+    const emojis = ['🕶️', '👻', '🐱', '🦊', '🐼', '🦄', '🐸', '🦋', '🐙', '🦉'];
+    if (!username) return emojis[0];
+    const hash = username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return emojis[hash % emojis.length];
+}
+
 function formatTime(timestamp) {
     const now = new Date();
     const postTime = new Date(timestamp);
@@ -279,52 +463,13 @@ function formatTime(timestamp) {
     return postTime.toLocaleDateString('id-ID');
 }
 
-// Like post function
-window.likePost = function(postId) {
-    const post = posts.find(p => p.id === postId);
-    if (post) {
-        post.likes++;
-        savePosts();
-        renderPosts();
-        showNotification('Liked! ❤️');
-    }
-};
-
-// Comment on post function
-window.commentOnPost = function(postId) {
-    const comment = prompt('Tulis komentarmu:');
-    if (comment && comment.trim()) {
-        const post = posts.find(p => p.id === postId);
-        if (post) {
-            if (!post.comments) post.comments = [];
-            post.comments.push({
-                username: currentUser.username,
-                content: comment.trim(),
-                timestamp: new Date().toISOString()
-            });
-            savePosts();
-            renderPosts();
-            showNotification('Komentar ditambahkan! 💬');
-        }
-    }
-};
-
-// Refresh posts
-refreshBtn.addEventListener('click', () => {
-    loadPosts();
-    showNotification('Feed diperbarui! 🔄');
-});
-
-// Helper function to escape HTML
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-// Show notification
 function showNotification(message) {
-    // Create notification element
     const notification = document.createElement('div');
     notification.className = 'notification';
     notification.textContent = message;
@@ -343,7 +488,6 @@ function showNotification(message) {
     
     document.body.appendChild(notification);
     
-    // Remove after 3 seconds
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => {
@@ -352,39 +496,63 @@ function showNotification(message) {
     }, 3000);
 }
 
+// Global functions for buttons
+window.likePost = function(postId) {
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+        post.likes++;
+        savePosts();
+        renderPosts();
+        showNotification('Liked! ❤️');
+    }
+};
+
+window.commentOnPost = function(postId) {
+    const comment = prompt('Tulis komentarmu:');
+    if (comment && comment.trim()) {
+        const post = posts.find(p => p.id === postId);
+        if (post) {
+            if (!post.comments) post.comments = [];
+            post.comments.push({
+                username: currentUser.username,
+                content: comment.trim(),
+                timestamp: new Date().toISOString()
+            });
+            savePosts();
+            renderPosts();
+            showNotification('Komentar ditambahkan! 💬');
+        }
+    }
+};
+
 // Add CSS animations
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
     }
     
     @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
     }
     
-    .empty-feed {
-        text-align: center;
-        padding: 40px;
+    .empty-feed { text-align: center; padding: 40px; color: #666; font-style: italic; }
+    
+    .post-hashtags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin: 10px 0;
+    }
+    
+    .post-hashtag {
+        background: #e0e0e0;
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-size: 0.8em;
         color: #666;
-        font-style: italic;
     }
 `;
 document.head.appendChild(style);
-
-// Initialize app when page loads
-document.addEventListener('DOMContentLoaded', initApp);
