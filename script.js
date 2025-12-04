@@ -556,3 +556,73 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+function updateRageCounter() {
+    const totalRages = posts.length;
+    const counterElement = document.getElementById('total-rages');
+    if (counterElement) {
+        counterElement.textContent = totalRages;
+    }
+    
+    // Add floating counter
+    let floatingCounter = document.querySelector('.rage-counter');
+    if (!floatingCounter) {
+        floatingCounter = document.createElement('div');
+        floatingCounter.className = 'rage-counter';
+        floatingCounter.innerHTML = `🔥 ${totalRages} KESAL`;
+        document.body.appendChild(floatingCounter);
+    } else {
+        floatingCounter.innerHTML = `🔥 ${totalRages} KESAL`;
+    }
+}
+
+// Update di function loadPosts():
+function loadPosts() {
+    const savedPosts = localStorage.getItem('anonz_posts');
+    if (savedPosts) {
+        posts = JSON.parse(savedPosts);
+    } else {
+        posts = [];
+    }
+    
+    renderPosts();
+    updateRageCounter(); // TAMBAH INI
+}
+
+// Update di function renderPosts():
+function renderPosts() {
+    if (!postsContainer) return;
+    
+    if (posts.length === 0) {
+        postsContainer.innerHTML = `
+            <div class="empty-feed">
+                <h3>🧱 DINDING KESAL MASIH KOSONG</h3>
+                <p>Jadi yang pertama melampiaskan kekesalan!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    postsContainer.innerHTML = posts.map(post => `
+        <div class="post ${post.isFirstRage ? 'is-first-rage' : ''}" data-id="${post.id}">
+            <div class="post-header">
+                <span class="post-avatar">${post.avatar}</span>
+                <span class="post-username">@${post.username}</span>
+                <span class="post-time">${formatTime(post.timestamp)}</span>
+            </div>
+            <div class="post-content">${escapeHtml(post.content)}</div>
+            ${post.hashtags ? `
+            <div class="post-hashtags">
+                ${post.hashtags.map(tag => `<span class="post-hashtag">${tag}</span>`).join('')}
+            </div>
+            ` : ''}
+            <div class="post-actions">
+                <button class="post-action-btn like-btn" onclick="likePost(${post.id})">
+                    <span>💢</span> <span>${post.likes} SETUJU</span>
+                </button>
+                <button class="post-action-btn" onclick="commentOnPost(${post.id})">
+                    <span>💬</span> <span>${post.comments?.length || 0} RESPON</span>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
