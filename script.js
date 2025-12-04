@@ -96,7 +96,19 @@ function showRageScreen() {
     displaySelectedHashtags();
 }
 
-function showMainScreen() {
+function showMainScreen()function loadUserHashtags() {
+    console.log('Loading user hashtags');
+    const savedHashtags = localStorage.getItem('anonz_hashtags');
+    if (savedHashtags) {
+        userHashtags = JSON.parse(savedHashtags);
+        console.log('User hashtags loaded:', userHashtags);
+        
+        // Display user hashtags in profile
+        displayUserHashtags();
+    } else {
+        console.log('No user hashtags found');
+    }
+} {
     console.log('Showing main screen');
     setScreenVisibility('main');
     
