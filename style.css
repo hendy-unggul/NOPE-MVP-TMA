@@ -642,3 +642,161 @@ body {
     margin-left: 10px;
     vertical-align: middle;
 }
+/* DINDING KESAL STYLING */
+.feed-header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid #ff3366;
+}
+
+.feed-header h3 {
+    font-size: 2em;
+    color: #ff3366;
+    text-align: center;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 0 #ffd93d;
+}
+
+.feed-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #666;
+    font-size: 0.9em;
+}
+
+#total-rages {
+    font-weight: bold;
+    color: #ff3366;
+    font-size: 1.2em;
+}
+
+/* Post Styling untuk Dinding Kesal */
+.post {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(255, 51, 102, 0.1);
+    border-left: 5px solid #ff3366;
+    position: relative;
+    transition: transform 0.3s;
+}
+
+.post:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(255, 51, 102, 0.2);
+}
+
+.post.is-first-rage {
+    border: 2px solid #ffd93d;
+    background: linear-gradient(135deg, #fff9c4, #ffffff);
+}
+
+.post.is-first-rage::before {
+    content: "🔥 KESAL PERTAMA";
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: #ff3366;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.post-avatar {
+    font-size: 1.8em;
+}
+
+.post-username {
+    font-weight: bold;
+    color: #333;
+    font-size: 1.1em;
+}
+
+.post-time {
+    color: #999;
+    font-size: 0.85em;
+    margin-left: auto;
+}
+
+.post-content {
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    padding: 10px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+.post-hashtags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 15px 0;
+}
+
+.post-hashtag {
+    background: linear-gradient(135deg, #ff3366, #ff8e53);
+    color: white;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.post-actions {
+    display: flex;
+    gap: 20px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.post-action-btn {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1em;
+    padding: 8px 15px;
+    border-radius: 20px;
+    transition: all 0.3s;
+}
+
+.post-action-btn:hover {
+    background: #f5f5f5;
+    color: #ff3366;
+}
+
+/* Rage Counter */
+.rage-counter {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    background: #ff3366;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 50px;
+    font-weight: bold;
+    box-shadow: 0 5px 20px rgba(255, 51, 102, 0.3);
+    z-index: 1000;
+}
