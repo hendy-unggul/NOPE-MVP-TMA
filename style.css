@@ -800,3 +800,161 @@ body {
     box-shadow: 0 5px 20px rgba(255, 51, 102, 0.3);
     z-index: 1000;
 }
+/* =========================================== */
+/* 4 TAB SYSTEM STYLES */
+/* =========================================== */
+
+.feed-container {
+    position: relative;
+    margin-bottom: 80px;
+}
+
+.feed-tab {
+    display: none;
+    animation: fadeIn 0.5s ease;
+}
+
+.feed-tab.active {
+    display: block;
+}
+
+/* Bottom Navigation Update */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0 15px;
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    border-top: 3px solid #ff3366;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    color: #999;
+    transition: all 0.3s;
+    border-radius: 15px;
+    min-width: 70px;
+}
+
+.nav-btn.active {
+    color: #ff3366;
+    background: rgba(255, 51, 102, 0.1);
+    transform: translateY(-10px);
+}
+
+.nav-icon {
+    font-size: 1.8em;
+    transition: transform 0.3s;
+}
+
+.nav-btn.active .nav-icon {
+    transform: scale(1.2);
+}
+
+.nav-label {
+    font-size: 0.8em;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Match Info Box */
+.match-info {
+    background: linear-gradient(135deg, rgba(255, 214, 0, 0.1), rgba(255, 145, 0, 0.1));
+    border-left: 4px solid #ffd600;
+    padding: 15px;
+    margin: 15px 0 25px;
+    border-radius: 0 10px 10px 0;
+}
+
+.match-info p {
+    margin: 0;
+    color: #333;
+    font-size: 0.95em;
+}
+
+.match-info strong {
+    color: #ff3366;
+}
+
+/* Post Match Badge */
+.match-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #00bcd4, #2196f3);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: 600;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+.match-badge.sefrekuensi {
+    background: linear-gradient(135deg, #4caf50, #8bc34a);
+}
+
+.match-badge.gelombang-a {
+    background: linear-gradient(135deg, #ff9800, #ffc107);
+}
+
+.match-badge.gelombang-b {
+    background: linear-gradient(135deg, #9c27b0, #e91e63);
+}
+
+/* User Hashtags in Post */
+.user-match-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.match-hashtags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.match-hashtag {
+    background: #e0e0e0;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    color: #666;
+}
+
+.match-hashtag.matched {
+    background: #ff3366;
+    color: white;
+    font-weight: bold;
+}
+
+/* Empty State */
+.empty-feed {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-feed h3 {
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.empty-feed p {
+    font-size: 0.95em;
+    max-width: 300px;
+    margin: 0 auto;
+}
