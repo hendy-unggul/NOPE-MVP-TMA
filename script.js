@@ -1,4 +1,31 @@
-// Inisialisasi WebApp Telegram
+// Telegram Bot Auto-Start
+document.addEventListener('DOMContentLoaded', function() {
+    // Cek jika di Telegram WebApp
+    if (window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+        
+        // Auto expand
+        tg.expand();
+        
+        // Auto login jika ada user data
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            const user = tg.initDataUnsafe.user;
+            const currentUser = {
+                id: user.id,
+                username: user.username || `user_${user.id}`,
+                firstName: user.first_name || 'Anon',
+                lastName: user.last_name || ''
+            };
+            
+            localStorage.setItem('anonz_user', JSON.stringify(currentUser));
+            
+            // Auto redirect ke main screen
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-screen').classList.remove('hidden');
+            document.getElementById('username').textContent = `@${currentUser.username}`;
+        }
+    }
+});// Inisialisasi WebApp Telegram
 const tg = window.Telegram.WebApp;
 tg.expand(); // Expand ke full screen
 
