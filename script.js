@@ -35,64 +35,43 @@ const telegramLoginBtn = document.getElementById('telegram-login-btn');
 
 // Initialize app
 function initApp() {
-    console.log('App initializing...');
+    console.log('=== APP INIT START ===');
+    
+    // CLEAR SEMUA DATA TEST - UNCOMMENT JIKA PERLU
+    // localStorage.clear();
+    // console.log('LocalStorage cleared for testing');
     
     const savedUser = localStorage.getItem('anonz_user');
     const savedHashtags = localStorage.getItem('anonz_hashtags');
     
+    console.log('1. localStorage items:');
+    console.log('   - anonz_user:', savedUser ? 'ADA' : 'TIDAK ADA');
+    console.log('   - anonz_hashtags:', savedHashtags ? 'ADA' : 'TIDAK ADA');
+    
     if (savedUser) {
-        currentUser = JSON.parse(savedUser);
-        
-        if (savedHashtags) {
-            showMainScreen();
-        } else {
-            showHashtagScreen();
+        try {
+            currentUser = JSON.parse(savedUser);
+            console.log('2. User parsed:', currentUser.username);
+            
+            if (savedHashtags) {
+                console.log('3. Hashtags found, going to MAIN SCREEN');
+                showMainScreen();
+            } else {
+                console.log('3. No hashtags, showing HASHTAG SCREEN');
+                showHashtagScreen();
+            }
+        } catch (error) {
+            console.error('Error parsing user:', error);
+            localStorage.clear();
+            showLoginScreen();
         }
     } else {
+        console.log('2. No user data, showing LOGIN SCREEN');
         showLoginScreen();
     }
-}
-
-// Screen functions
-function showLoginScreen() {
-    setScreenVisibility('login');
-}
-
-function showHashtagScreen() {
-    setScreenVisibility('hashtag');
-    selectedHashtags = [];
-}
-
-function showRageScreen() {
-    setScreenVisibility('rage');
-}
-
-function showMainScreen() {
-    setScreenVisibility('main');
-    loadUserHashtags();
-    switchTab('dinding');
-}
-
-function setScreenVisibility(activeScreen) {
-    [loginScreen, hashtagScreen, rageScreen, mainScreen].forEach(screen => {
-        if (screen) screen.classList.add('hidden');
-    });
     
-    switch(activeScreen) {
-        case 'login':
-            if (loginScreen) loginScreen.classList.remove('hidden');
-            break;
-        case 'hashtag':
-            if (hashtagScreen) hashtagScreen.classList.remove('hidden');
-            break;
-        case 'rage':
-            if (rageScreen) rageScreen.classList.remove('hidden');
-            break;
-        case 'main':
-            if (mainScreen) mainScreen.classList.remove('hidden');
-            break;
-    }
-}
+    console.log('=== APP INIT END ===');
+}}
 
 // Telegram login
 telegramLoginBtn.addEventListener('click', () => {
