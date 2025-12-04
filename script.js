@@ -1,4 +1,6 @@
-// Telegram WebApp initialization
+// Tab management
+let currentTab = 'dinding';
+let userHashtags = [];// Telegram WebApp initialization
 let tg = window.Telegram?.WebApp;
 
 if (tg) {
