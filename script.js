@@ -1,4 +1,31 @@
-// Tab management
+// Telegram WebApp initialization
+let tg = window.Telegram?.WebApp;
+
+if (tg) {
+    tg.ready();
+    tg.expand();
+} else {
+    // Mock for development
+    tg = {
+        initDataUnsafe: {
+            user: {
+                id: Date.now(),
+                username: 'test_user_' + Math.random().toString(36).substr(2, 9),
+                first_name: 'Test',
+                last_name: 'User'
+            }
+        },
+        expand: () => console.log('Mock expand'),
+        ready: () => console.log('Mock ready')
+    };
+}
+
+// State aplikasi - HANYA SATU KALI DEKLARASI!
+let currentUser = null;
+let selectedHashtags = [];
+let posts = [];
+let currentTab = 'dinding';
+let userHashtags = [];// Tab management
 
 let userHashtags = [];// Telegram WebApp initialization
 let tg = window.Telegram?.WebApp;
