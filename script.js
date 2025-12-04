@@ -26,7 +26,8 @@ if (tg) {
 let currentUser = null;
 let selectedHashtags = [];
 let posts = [];
-
+let currentTab = 'dinding';
+let userHashtags = [];
 // DOM Elements
 const loginScreen = document.getElementById('login-screen');
 const mainScreen = document.getElementById('main-screen');
