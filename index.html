@@ -38,7 +38,118 @@
                 </div>
             </div>
         </div>
+<!-- Hashtag Selection Screen -->
+<div id="hashtag-screen" class="screen hidden">
+    <div class="container">
+        <h2>🕶️ Pilih 3 Hal yang Bikin Kesel</h2>
+        <p class="subtitle">Ini akan jadi identitas anonim kamu</p>
+        
+        <div class="zones">
+            <!-- ZONE 1: POPCULTURE -->
+            <div class="zone">
+                <h3>🎬 POPCULTURE (Gateway)</h3>
+                <div class="hashtags">
+                    <label class="hashtag-option">
+                        <input type="checkbox" name="hashtag" value="#FilmEndingGaje">
+                        <span>#FilmEndingGaje</span>
+                    </label>
+                    <label class="hashtag-option">
+                        <input type="checkbox" name="hashtag" value="#BelITiketJualGinjal">
+                        <span>#BelITiketJualGinjal</span>
+                    </label>
+                    <label class="hashtag-option">
+                        <input type="checkbox" name="hashtag" value="#InfluencerNgehek">
+                        <span>#InfluencerNgehek</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- ZONE 2: PERSONAL PAIN -->
+            <div class="zone">
+                <h3>💔 PERSONAL PAIN (Depth)</h3>
+                <div class="hashtags">
+                    <label class="hashtag-option">
+                        <input type="checkbox" name="hashtag" value="#DiGhostingGebetan">
+                        <span>#DiGhostingGebetan</span>
+                    </label>
+                    <label class="hashtag-option">
+                        <input type="checkbox" name="hashtag" value="#DiajakJalanTapiKempes">
+                        <span>#DiajakJalanTapiKempes</span>
+                    </label>
+                    <label class="hashtag-option">
+                        <input type="checkbox" name="hashtag" value="#MagangDigajiSertifikat">
+                        <span>#MagangDigajiSertifikat</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- ZONE 3: SOCIAL SICKNESS -->
+            <div class="zone">
+                <h3>🤮 SOCIAL SICKNESS (Patterns)</h3>
+                <div class="hashtags">
+                    <label class="hashtag-option">
+                        <input type="checkbox" name="hashtag" value="#RencanaPinPlan">
+                        <span>#RencanaPinPlan</span>
+                    </label>
+                    <label class="hashtag-option">
+                        <input type="checkbox" name="hashtag" value="#DramaQueenAnjay">
+                        <span>#DramaQueenAnjay</span>
+                    </label>
+                    <label class="hashtag-option">
+                        <input type="checkbox" name="hashtag" value="#BacotLambeTurah">
+                        <span>#BacotLambeTurah</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- ZONE 4: MOVEMENT -->
+            <div class="zone">
+                <h3>✊ MOVEMENT (Action)</h3>
+                <div class="hashtags">
+                    <label class="hashtag-option">
+                        <input type="checkbox" name="hashtag" value="#SayNOPEBukanPilihan">
+                        <span>#SayNOPEBukanPilihan</span>
+                    </label>
+                    <label class="hashtag-option">
+                        <input type="checkbox" name="hashtag" value="#NOPEItuHakKita">
+                        <span>#NOPEItuHakKita</span>
+                    </label>
+                    <label class="hashtag-option">
+                        <input type="checkbox" name="hashtag" value="#NOPEBersamaKitaKita">
+                        <span>#NOPEBersamaKitaKita</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="selection-counter">
+            <span id="selected-count">0</span>/3 hashtag terpilih
+        </div>
+        
+        <button id="next-to-rage-btn" class="btn-next" disabled>Lanjut ke Rage 💢</button>
+    </div>
+</div>
 
+<!-- First Rage Screen -->
+<div id="rage-screen" class="screen hidden">
+    <div class="container">
+        <h2>💢 Luapkan Kesal Pertamamu!</h2>
+        <p class="subtitle">Max 280 karakter. Ini akan jadi post pertamamu.</p>
+        
+        <div class="selected-hashtags" id="selected-hashtags-display">
+            <!-- Hashtag yang dipilih akan muncul di sini -->
+        </div>
+        
+        <textarea id="first-rage" placeholder="Tulis kesal pertama kamu di sini... Bebas, anonim, dan tanpa filter!" maxlength="280"></textarea>
+        
+        <div class="rage-actions">
+            <div class="char-count">
+                <span id="rage-char-count">0</span>/280
+            </div>
+            <button id="post-first-rage-btn" class="btn-rage" disabled>Post & Masuk! 🚀</button>
+        </div>
+    </div>
+</div>
         <!-- Main App Screen (hidden by default) -->
         <div id="main-screen" class="screen hidden">
             <div class="header">
